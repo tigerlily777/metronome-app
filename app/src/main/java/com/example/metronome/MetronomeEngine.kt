@@ -119,12 +119,16 @@ class MetronomeEngine @Inject constructor() {
     /**
      * Generates a sine-wave click at the specified frequency with fade-out envelope.
      */
-    private fun generateClickSamples(frequencyHz: Double): ShortArray {
+    private fun generateClickSamples(frequencyHz: Double, isAccent: Boolean = false): ShortArray {
         val numSamples = (Constants.SAMPLE_RATE * Constants.CLICK_DURATION_MS / 1000.0).toInt()
         return ShortArray(numSamples) { i ->
             val angle = 2.0 * Math.PI * frequencyHz * i / Constants.SAMPLE_RATE
             val envelope = 1.0 - (i.toDouble() / numSamples)
-            (sin(angle) * envelope * Short.MAX_VALUE).toInt().toShort()
+            val amplitudeBoost = if (isAccent) 1.2 else 1.0  // Accent slightly louder
+            (sin(angle) * envelope * amplitudeBoost * Short.MAX_VALUE).toInt().coerceIn(
+                Short.MIN_VALUE.toInt(),
+                Short.MAX_VALUE.toInt()
+            ).toShort()
         }
     }
 
