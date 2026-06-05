@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.example.metronome.MetronomeEngine
 import com.example.metronome.utils.Constants
 import com.example.metronome.utils.Constants.AccentPattern
+import com.example.metronome.utils.Constants.Subdivision
 import com.example.metronome.utils.Constants.TimeSignature
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,9 +35,13 @@ class MetronomeViewModel @Inject constructor(
     private val _accentPattern = MutableStateFlow(AccentPattern.default())
     val accentPattern: StateFlow<AccentPattern> = _accentPattern.asStateFlow()
 
-    // Expose all available time signatures and patterns for UI selection
+    private val _subdivision = MutableStateFlow(Subdivision.default())
+    val subdivision: StateFlow<Subdivision> = _subdivision.asStateFlow()
+
+    // Expose all available options for UI selection
     val availableTimeSignatures = TimeSignature.entries
     val availableAccentPatterns = AccentPattern.entries
+    val availableSubdivisions = Subdivision.entries
 
     // --- User Actions ---
 
@@ -52,7 +57,8 @@ class MetronomeViewModel @Inject constructor(
         engine.play(
             bpm = _bpm.value,
             timeSignature = _timeSignature.value,
-            accentPattern = _accentPattern.value
+            accentPattern = _accentPattern.value,
+            subdivision = _subdivision.value
         )
         _isPlaying.value = true
     }
@@ -102,6 +108,18 @@ class MetronomeViewModel @Inject constructor(
      */
     fun setAccentPattern(accentPattern: AccentPattern) {
         _accentPattern.value = accentPattern
+        if (_isPlaying.value) {
+            stopPlayback()
+            startPlayback()
+        }
+    }
+
+    /**
+     * Changes the subdivision (clicks per beat).
+     * If playing, restart playback.
+     */
+    fun setSubdivision(subdivision: Subdivision) {
+        _subdivision.value = subdivision
         if (_isPlaying.value) {
             stopPlayback()
             startPlayback()
