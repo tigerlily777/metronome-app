@@ -91,10 +91,11 @@ class MetronomeEngine @Inject constructor() {
     }
 
     /**
-     * Plays a single click by selecting the appropriate audio sample.
+     * Plays a single click, with optional volume boost for accent beats.
      */
     private fun playOnce() {
-        val samples = if (shouldAccent()) accentClickSamples else regularClickSamples
+        val isAccent = shouldAccent()
+        val samples = if (isAccent) accentClickSamples else regularClickSamples
         samples ?: return
 
         // If AudioTrack hasn't been created yet, create it now
@@ -106,6 +107,13 @@ class MetronomeEngine @Inject constructor() {
         audioTrack?.stop()
         audioTrack?.reloadStaticData()
         audioTrack?.play()
+
+        // Boost volume for accent beats
+        if (isAccent) {
+            audioTrack?.setVolume(1.0f)  // Max volume for accent
+        } else {
+            audioTrack?.setVolume(0.2f)  // 60% volume for regular beats
+        }
     }
 
     /**
