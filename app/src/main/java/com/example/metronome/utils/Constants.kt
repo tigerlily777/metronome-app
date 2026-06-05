@@ -50,7 +50,7 @@ object Constants {
         EIGHTH(8, "8");
 
         companion object {
-            fun default() = QUARTER
+            fun default() = WHOLE
         }
     }
 }
