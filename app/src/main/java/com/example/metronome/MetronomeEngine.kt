@@ -23,7 +23,9 @@ import kotlin.math.sin
  */
 class MetronomeEngine @Inject constructor() {
 
-    private var audioTrack: AudioTrack? = null
+
+    private var accentAudioTrack: AudioTrack? = null
+    private var regularAudioTrack: AudioTrack? = null
     private var tickJob: Job? = null
     private val engineScope = CoroutineScope(Dispatchers.Default)
 
@@ -89,6 +91,12 @@ class MetronomeEngine @Inject constructor() {
             )
         }
 
+        regularAudioTrack = buildAudioTrack(regularClickSamples!!)
+        regularAudioTrack?.write(regularClickSamples!!, 0, regularClickSamples!!.size)
+
+        accentAudioTrack = buildAudioTrack(accentClickSamples!!)
+        accentAudioTrack?.write(accentClickSamples!!, 0, accentClickSamples!!.size)
+
         val beatIntervalMs = Constants.MS_PER_MINUTE / bpm
         val clickIntervalMs = beatIntervalMs / subdivision.clicksPerBeat
         val totalClicksPerMeasure = timeSignature.beatsPerMeasure * subdivision.clicksPerBeat
@@ -108,9 +116,12 @@ class MetronomeEngine @Inject constructor() {
     fun release() {
         tickJob?.cancel()
         tickJob = null
-        audioTrack?.stop()
-        audioTrack?.release()
-        audioTrack = null
+        regularAudioTrack?.stop()
+        regularAudioTrack?.release()
+        regularAudioTrack = null
+        accentAudioTrack?.stop()
+        accentAudioTrack?.release()
+        accentAudioTrack = null
         regularClickSamples = null
         accentClickSamples = null
     }
@@ -139,25 +150,19 @@ class MetronomeEngine @Inject constructor() {
      */
     private fun playOnce() {
         val isAccent = shouldAccent()
-        val samples = if (isAccent) accentClickSamples else regularClickSamples
-        samples ?: return
+        val track = if (isAccent) accentAudioTrack else regularAudioTrack
+        track ?: return
 
-        if (audioTrack == null) {
-            audioTrack = buildAudioTrack(samples)
-            audioTrack?.write(samples, 0, samples.size)
-        }
+        track.stop()
+        track.reloadStaticData()
+        track.play()
 
-        audioTrack?.stop()
-        audioTrack?.reloadStaticData()
-        audioTrack?.play()
-
-        // Set volume based on emphasis mode
         val volume = when {
-            !isAccent -> 0.6f
-            beatEmphasis == BeatEmphasis.PITCH_ONLY -> 0.6f  // Same volume, different pitch
-            else -> 1.0f  // Louder for volume-based emphasis
+            !isAccent -> 0.4f
+            beatEmphasis == BeatEmphasis.PITCH_ONLY -> 0.4f
+            else -> 1.0f
         }
-        audioTrack?.setVolume(volume)
+        track.setVolume(volume)
     }
 
     /**
