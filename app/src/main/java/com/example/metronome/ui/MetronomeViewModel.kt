@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.example.metronome.MetronomeEngine
 import com.example.metronome.utils.Constants
 import com.example.metronome.utils.Constants.AccentPattern
+import com.example.metronome.utils.Constants.BeatEmphasis
 import com.example.metronome.utils.Constants.Subdivision
 import com.example.metronome.utils.Constants.TimeSignature
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,10 +39,14 @@ class MetronomeViewModel @Inject constructor(
     private val _subdivision = MutableStateFlow(Subdivision.default())
     val subdivision: StateFlow<Subdivision> = _subdivision.asStateFlow()
 
+    private val _beatEmphasis = MutableStateFlow(BeatEmphasis.default())
+    val beatEmphasis: StateFlow<BeatEmphasis> = _beatEmphasis.asStateFlow()
+
     // Expose all available options for UI selection
     val availableTimeSignatures = TimeSignature.entries
     val availableAccentPatterns = AccentPattern.entries
     val availableSubdivisions = Subdivision.entries
+    val availableBeatEmphasis = BeatEmphasis.entries
 
     // --- User Actions ---
 
@@ -58,7 +63,8 @@ class MetronomeViewModel @Inject constructor(
             bpm = _bpm.value,
             timeSignature = _timeSignature.value,
             accentPattern = _accentPattern.value,
-            subdivision = _subdivision.value
+            subdivision = _subdivision.value,
+            beatEmphasis = _beatEmphasis.value
         )
         _isPlaying.value = true
     }
@@ -120,6 +126,18 @@ class MetronomeViewModel @Inject constructor(
      */
     fun setSubdivision(subdivision: Subdivision) {
         _subdivision.value = subdivision
+        if (_isPlaying.value) {
+            stopPlayback()
+            startPlayback()
+        }
+    }
+
+    /**
+     * Changes how the strong beat is emphasized (volume, pitch, or combination).
+     * If playing, restart playback.
+     */
+    fun setBeatEmphasis(emphasis: BeatEmphasis) {
+        _beatEmphasis.value = emphasis
         if (_isPlaying.value) {
             stopPlayback()
             startPlayback()
