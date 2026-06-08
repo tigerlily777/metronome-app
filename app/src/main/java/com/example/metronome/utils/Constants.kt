@@ -9,10 +9,11 @@ object Constants {
     const val BPM_STEP_SMALL = 1
     const val BPM_STEP_LARGE = 10
 
-    // Audio
+    // Audio frequencies
     const val SAMPLE_RATE = 44100
-    const val CLICK_FREQUENCY_HZ = 1000.0
-    const val CLICK_FREQUENCY_ACCENT_HZ = 1500.0
+    const val CLICK_FREQUENCY_LOW = 500.0      // For different pitch mode
+    const val CLICK_FREQUENCY_NORMAL = 1000.0
+    const val CLICK_FREQUENCY_HIGH = 1500.0
     const val CLICK_DURATION_MS = 30
     const val MS_PER_MINUTE = 60_000L
 
@@ -31,6 +32,18 @@ object Constants {
         }
     }
 
+    // How to emphasize the strong beat
+    enum class BeatEmphasis(val displayName: String) {
+        VOLUME_ONLY("Louder"),
+        PITCH_ONLY("Higher Pitch"),
+        VOLUME_AND_PITCH("Louder + Higher"),
+        DIFFERENT_PITCH("Lower First");
+
+        companion object {
+            fun default() = VOLUME_AND_PITCH
+        }
+    }
+
     // Accent pattern
     enum class AccentPattern(val displayName: String) {
         STANDARD("Even"),
@@ -44,10 +57,10 @@ object Constants {
 
     // Subdivision - how many clicks per beat
     enum class Subdivision(val clicksPerBeat: Int, val displayName: String) {
-        WHOLE(1, "1"),
-        HALF(2, "2"),
-        QUARTER(4, "4"),
-        EIGHTH(8, "8");
+        WHOLE(1, "None"),
+        HALF(2, "1/2"),
+        QUARTER(4, "1/4"),
+        EIGHTH(8, "1/8");
 
         companion object {
             fun default() = WHOLE
