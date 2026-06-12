@@ -31,3 +31,11 @@ Remove:
 ❌ 当前的 Accent Pattern 三选项
 
 ❌ 当前的 First Beat Style 四选项（改成 Accent Sound）
+
+Phase 2：视觉升级
+
+1. BPM large size display
+2. Use Material 3 Card
+3. 音符化 Subdivision
+4. Beat Indicator
+5. Start 按钮固定
